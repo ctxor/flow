@@ -1,0 +1,8 @@
+.git
+.vscode
+.env
+work
+bin
+ai-agent/.venv
+**/__pycache__
+**/*.pyc

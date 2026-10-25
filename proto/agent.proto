@@ -1,0 +1,44 @@
+syntax = "proto3";
+package agent.v1;
+option go_package = "protobuf/gen/agent/v1;agentv1";
+
+service AgentService {
+  rpc Plan(PlanRequest) returns (PlanResponse);
+}
+
+message PlanRequest {
+  string job_id = 1;
+  string text = 2;
+  string timezone = 3;
+  string now = 4;
+}
+
+message PlanResponse {
+  oneof result {
+    CreateTask create_task = 1;
+    SaveNote save_note = 2;
+    CreateEvent create_event = 3;
+    QueryTasks query_tasks = 4;
+    SummarizeDay summarize_day = 5;
+    Clarification clarification = 6;
+  }
+}
+
+message CreateTask {
+  string title = 1;
+  string description = 2;
+  string due_at = 3;
+  int32 remind_before_minutes = 4;
+  bool has_reminder = 5;
+}
+message SaveNote { string title = 1; string content = 2; }
+message CreateEvent {
+  string title = 1;
+  string starts_at = 2;
+  string ends_at = 3;
+  int32 remind_before_minutes = 4;
+  bool has_reminder = 5;
+}
+message QueryTasks { bool today_only = 1; }
+message SummarizeDay {}
+message Clarification { string question = 1; }

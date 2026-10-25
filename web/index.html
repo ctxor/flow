@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>拾序 · 个人效率助手</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <section id="auth-screen" class="auth-screen">
+      <div class="auth-brand">
+        <div class="brand-mark">序</div>
+        <span>拾序 / FLOW</span>
+      </div>
+      <div class="auth-copy">
+        <span class="eyebrow">MAKE ROOM FOR WHAT MATTERS</span>
+        <h1>把想做的事，<br />放进有序的一天。</h1>
+        <p>随手记录，按时提醒。<br />让任务、灵感和日程，在一处安放。</p>
+        <div class="auth-tags">
+          <span>任务与备忘</span><span>对话式记录</span><span>共享协作</span>
+        </div>
+      </div>
+      <form id="auth-form" class="auth-card">
+        <span class="eyebrow">YOUR PERSONAL WORKSPACE</span>
+        <h2 id="auth-title">欢迎回来</h2>
+        <p id="auth-description">登录，继续安排你的每一天。</p>
+        <label
+          >邮箱<input
+            name="email"
+            type="email"
+            autocomplete="username"
+            required
+            placeholder="you@example.com" /></label
+        ><label
+          >密码<input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            minlength="10"
+            maxlength="72"
+            required
+            placeholder="至少 10 个字符" /></label
+        ><button class="primary" id="auth-submit">登录</button>
+        <p id="auth-error" class="error" role="alert"></p>
+        <button type="button" class="text-button" id="auth-toggle">
+          还没有账号？创建一个
+        </button>
+      </form>
+    </section>
+    <div id="app" class="app hidden">
+      <aside class="sidebar">
+        <a class="brand" href="/"
+          ><div class="brand-mark">序</div>
+          <span>拾序<small>FLOW</small></span></a
+        ><label class="workspace-label"
+          >当前空间<select id="workspace-select" aria-label="选择空间"></select
+        ></label>
+        <nav id="navigation">
+          <button data-view="overview" class="nav active">
+            <span>◈</span>我的一天</button
+          ><button data-view="tasks" class="nav"><span>☑</span>任务清单</button
+          ><button data-view="notes" class="nav"><span>▤</span>随手备忘</button
+          ><button data-view="events" class="nav"><span>▦</span>日程安排</button
+          ><button data-view="collaboration" class="nav">
+            <span>♧</span>空间协作</button
+          ><button data-view="settings" class="nav">
+            <span>⚙</span>平台接入
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <p>给重要的事，<br />留一点从容。</p>
+          <div class="account">
+            <span class="avatar" id="avatar">我</span>
+            <div>
+              <strong id="account-name"></strong
+              ><small id="timezone-name"></small>
+            </div>
+            <button id="logout" class="icon-button" aria-label="退出登录">
+              ↗
+            </button>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <p class="eyebrow" id="today-label"></p>
+            <h1 id="view-title">我的一天</h1>
+            <p id="view-description" class="muted">
+              整理眼前的事，留住转瞬的灵感。
+            </p>
+          </div>
+          <div class="header-actions">
+            <span id="live-status" class="live">连接中</span
+            ><button class="primary" id="new-button">＋ 新建任务</button>
+          </div>
+        </header>
+        <section class="stats" id="stats"></section>
+        <div class="content-grid">
+          <section class="main-content" id="main-content"></section>
+          <aside class="assistant-panel">
+            <div class="panel-heading">
+              <span class="spark">✦</span>
+              <div>
+                <h2>你的效率助手</h2>
+                <p>把想法说出来，下一步交给我。</p>
+              </div>
+            </div>
+            <div class="suggestions">
+              <button data-prompt="明天下午3点交周报，提前10分钟提醒我">
+                安排一个待办 ↗</button
+              ><button data-prompt="记一下：下次分享会聊聊最近读的书">
+                记下一个灵感 ↗</button
+              ><button data-prompt="查看今天的任务">看看今天的任务 ↗</button>
+            </div>
+            <div id="chat-history" class="chat-history" aria-live="polite">
+              <div class="chat assistant">
+                你好。可以让我创建任务、保存备忘、安排日程，或查询当前空间的任务。
+              </div>
+            </div>
+            <form id="assistant-form">
+              <label class="sr-only" for="assistant-input">给助手发消息</label
+              ><textarea
+                id="assistant-input"
+                rows="3"
+                maxlength="4000"
+                placeholder="例如：明天下午3点交周报，提前10分钟提醒我"
+                required
+              ></textarea>
+              <div class="composer-footer">
+                <span>当前空间内操作</span
+                ><button class="primary small" id="assistant-send">
+                  发送 ↑
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </main>
+    </div>
+    <dialog id="editor">
+      <form id="editor-form">
+        <div class="dialog-heading">
+          <h2 id="editor-title"></h2>
+          <button
+            type="button"
+            class="icon-button"
+            id="editor-close"
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+        <div id="editor-fields"></div>
+        <p class="error" id="editor-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button type="button" class="secondary" id="editor-cancel">
+            取消</button
+          ><button class="primary" id="editor-save">保存</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" class="toast hidden" role="status"></div>
+  </body>
+</html>

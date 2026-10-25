@@ -1,0 +1,7 @@
+.env
+work/
+bin/
+ai-agent/.venv/
+__pycache__/
+*.pyc
+.DS_Store
