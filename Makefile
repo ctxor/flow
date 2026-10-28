@@ -1,4 +1,4 @@
-.PHONY: init up down deps generate test integration api worker agent fmt
+.PHONY: init up down deps dev dev-deps generate test integration api worker agent fmt
 
 init:
 	python3 scripts/init_env.py
@@ -8,6 +8,14 @@ up: init
 
 down:
 	docker compose down
+
+# Foreground launcher: reuses the database and starts Redis, Agent, Worker, API.
+dev: init
+	python3 scripts/dev.py run
+
+# Keep this running when launching Go programs individually from the debugger.
+dev-deps: init
+	python3 scripts/dev.py deps
 
 deps:
 	go mod download

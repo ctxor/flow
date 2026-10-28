@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Flow: 启动依赖",
+      "type": "process",
+      "command": "python3",
+      "args": ["${workspaceFolder}/scripts/dev.py", "deps"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false },
+      "problemMatcher": {
+        "owner": "flow-development",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^FLOW_START:",
+          "endsPattern": "^FLOW_READY:"
+        }
+      }
+    }
+  ]
+}

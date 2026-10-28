@@ -3,8 +3,11 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -16,6 +19,9 @@ type Config struct {
 }
 
 func Load() (Config, error) {
+	if err := loadEnv(); err != nil {
+		return Config{}, err
+	}
 	c := Config{
 		Addr:        env("HTTP_ADDR", "127.0.0.1:8080"),
 		DatabaseURL: env("DATABASE_URL", "postgres://assistant:assistant@127.0.0.1:55432/assistant?sslmode=disable"),
@@ -43,6 +49,41 @@ func Load() (Config, error) {
 		return c, fmt.Errorf("WeChat callbacks require WECHAT_TOKEN")
 	}
 	return c, nil
+}
+
+// loadEnv supports both project-root execution and IDE launches from cmd/api or
+// cmd/worker. Existing process environment always takes precedence over the file.
+func loadEnv() error {
+	if path := strings.TrimSpace(os.Getenv("ENV_FILE")); path != "" {
+		if err := godotenv.Load(path); err != nil {
+			return fmt.Errorf("load ENV_FILE %q: %w", path, err)
+		}
+		return nil
+	}
+	dir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("locate project configuration: %w", err)
+	}
+	for {
+		path := filepath.Join(dir, ".env")
+		if _, err := os.Stat(path); err == nil {
+			if err := godotenv.Load(path); err != nil {
+				return fmt.Errorf("load configuration %q: %w", path, err)
+			}
+			return nil
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("read configuration %q: %w", path, err)
+		}
+		// Never pick up an unrelated parent project's configuration.
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return nil // Containers can supply configuration entirely via environment.
+		}
+		dir = parent
+	}
 }
 
 func env(key, fallback string) string {

@@ -16,7 +16,35 @@
 
 默认 `AI_MODE=demo` 是保守的规则演示，不调用语言模型。配置 `AI_MODE=openai` 后调用支持 Chat Completions 的模型接口，使用结构化输出并做本地参数校验。模型与平台密钥由你提供，不会写入仓库。
 
-## 一键运行
+## 本机快速启动（推荐）
+
+在项目根目录执行：
+
+```sh
+make dev
+```
+
+启动器会复用现有 PostgreSQL 数据库，启动 Redis、Python Agent、Go Worker 和 API。看到 `FLOW_READY` 后打开 <http://127.0.0.1:8080>。终端需要保持运行；按 Ctrl+C 停止本次启动的进程，已经存在的数据库不会被删除或停止。启动日志保存在 `work/dev-logs/`。
+
+首次在新机器运行时，先启动 Docker Desktop，再执行 `make deps` 安装 Go/Python 依赖。PostgreSQL、Redis 不存在时会尝试用 Compose 启动；本机有 Redis 可执行文件时优先使用本机实例。
+
+## VS Code / Delve 调试
+
+1. 用 VS Code 打开**项目根目录**，不要只打开 `cmd/api`。
+2. 如果终端已在运行 `make dev`，先按 Ctrl+C 停止，避免 API 端口冲突或额外 Worker 消费掉断点对应的作业。
+3. 在“运行和调试”的下拉列表选择 **Flow: 完整调试（API + Worker）**，按 F5。
+4. 自动启动的“Flow: 启动依赖”任务会准备数据库、Redis 和 Python Agent；API、Worker 则由调试器启动。
+5. 网页地址仍是 <http://127.0.0.1:8080>。手动创建任务的断点放在 `CreateTask`，AI 后台流程的断点放在 Worker 的 `AgentJob` / `apply`。
+
+也可以先在终端运行 `make dev-deps`，再选择 `Flow: API` 或 `Flow: Worker` 调试单个进程；只有 API 时，网页的基本增删改查可用，AI 作业和到期提醒还需要 Worker。停止 Go 调试后，依赖任务可能继续运行，可从 VS Code“终端 → 终止任务”停止“Flow: 启动依赖”。
+
+完整调试的依赖任务只执行一次，就绪后才并行启动两个 Go 进程，参考 [VS Code 复合调试配置](https://code.visualstudio.com/docs/debugtest/debugging-configuration)。
+
+两个 Go 入口会从当前目录向上查找 `.env`，到 `go.mod` 所在目录为止，因此从 `cmd/api` / `cmd/worker` 启动也能加载根目录配置。可用 `ENV_FILE` 指定明确的配置文件，已有进程环境变量优先。`.vscode/launch.json` 同时显式设置了根目录 `cwd` 和 `envFile`。
+
+如果出现 `AGENT_TOKEN must have at least 16 characters`，请检查根目录 `.env` 是否存在、同名环境变量是否被设为空，以及调试配置是否使用了错误工作目录。`make init` 只创建缺失的配置，不会覆盖已有密钥。
+
+## Docker 一键运行
 
 需要 Docker Compose、Make 和 Python 3。首次执行会生成 `.env` 和随机内部服务凭证，不覆盖已有配置。
 

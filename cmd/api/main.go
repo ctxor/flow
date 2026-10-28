@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"net"
@@ -19,7 +18,6 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load()
 	if err := run(); err != nil {
 		slog.Error("API stopped", "error", err)
 		os.Exit(1)

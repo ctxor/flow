@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"os"
@@ -17,7 +16,6 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load()
 	if err := run(); err != nil {
 		slog.Error("worker stopped", "error", err)
 		os.Exit(1)
